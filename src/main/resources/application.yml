@@ -1,0 +1,26 @@
+#服务端口
+server:
+  port: 9000
+
+#Redis配置
+spring:
+  redis:
+    database: 3
+    host: 127.0.0.1
+    port: 6379
+    password:
+    jedis:
+      pool:
+        max-active: 10
+        max-idle: 8
+        min-idle: 0
+        max-wait: 60s
+
+#消息缓存配置
+message:
+  #消息在redis中的最长存储时间（默认一周）
+  timeout: 604800
+  #每次请求获取的消息数量（默认50条）
+  listNum: 50
+  #消息撤回时限（单位：秒，默认2分钟后禁止撤回）
+  recallTimeLimit: 120
