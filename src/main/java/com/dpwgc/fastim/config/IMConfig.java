@@ -26,6 +26,7 @@ public class IMConfig implements InitializingBean {
      */
     @Override
     public void afterPropertiesSet() {
+        //将配置文件中的信息加载到静态变量中
         TIMEOUT = timeout;
         LISTNUM = listNum;
     }
