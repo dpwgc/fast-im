@@ -16,8 +16,8 @@ spring:
         min-idle: 0
         max-wait: 60s
 
-#消息缓存配置
-message:
+#IM配置
+im:
   #消息在redis中的最长存储时间（默认一周）
   timeout: 604800
   #每次请求获取的消息数量（默认50条）
