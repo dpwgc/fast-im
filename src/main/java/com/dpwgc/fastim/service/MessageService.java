@@ -19,7 +19,7 @@ public class MessageService {
     ObjectMapper objectMapper;
 
     //消息过期清除时限
-    @Value("${im.recallTimeLimit}")
+    @Value("${im.groupMessage.recallTimeLimit}")
     long recallTimeLimit;
 
     /**
@@ -34,7 +34,7 @@ public class MessageService {
         ResultUtil<Object> resultUtil = new ResultUtil<>();
 
         //获取指定区间的消息列表
-        List<Object> list = redisUtil.lGet(groupId,startPage,endPage);
+        List<Object> list = redisUtil.lGet("gml:"+groupId,startPage,endPage);
 
         resultUtil.setCode(200);
         resultUtil.setMsg("操作成功");
@@ -61,7 +61,7 @@ public class MessageService {
         }
 
         //根据群组id获取群组全部消息
-        List<Object> list = redisUtil.lGet(groupId,0,-1);
+        List<Object> list = redisUtil.lGet("gml:"+groupId,0,-1);
 
         //遍历群组消息
         for (Object msg : list) {
@@ -73,7 +73,7 @@ public class MessageService {
             if (messageObject.getUserId().equals(userId) && messageObject.getTs().equals(ts)) {
 
                 //从Redis list中删除这一个消息
-                long i = redisUtil.lRemove(groupId, 1, msg);
+                long i = redisUtil.lRemove("gml:"+groupId, 1, msg);
                 if(i == 0){
                     resultUtil.setCode(100);
                     resultUtil.setMsg("消息不存在");

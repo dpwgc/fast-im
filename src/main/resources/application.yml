@@ -18,9 +18,13 @@ spring:
 
 #IM配置
 im:
-  #群组消息列表在redis中的最长存储时间（默认一周，如果该群在一周内无人发言，则删除该群组的消息列表）
-  timeout: 604800
-  #每次请求获取的消息数量（默认50条）
-  listNum: 50
-  #消息撤回时限（单位：秒，默认2分钟后禁止撤回）
-  recallTimeLimit: 120
+  groupMessage:
+    #群组消息列表在redis中的最长存储时间（默认一周，如果该群在一周内无人发言，则删除该群组的消息列表）
+    timeout: 604800
+    #每次请求获取的消息数量（默认50条）
+    listNum: 50
+    #消息撤回时限（单位：秒，默认2分钟后禁止撤回）
+    recallTimeLimit: 120
+  groupList:
+    #群组列表信息更新数量（每{updateRate}秒更新一次）
+    updateRate:

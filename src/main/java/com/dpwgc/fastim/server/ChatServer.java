@@ -2,6 +2,7 @@ package com.dpwgc.fastim.server;
 
 import com.alibaba.fastjson.JSONObject;
 import com.dpwgc.fastim.config.IMConfig;
+import com.dpwgc.fastim.dao.MessageList;
 import com.dpwgc.fastim.dao.MessageObject;
 import com.dpwgc.fastim.util.RedisUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,7 +68,7 @@ public class ChatServer {
         addOnlineCount();
 
         try {
-            //list的长度（终止页）
+            //list的总长度（终止页）
             long endPage = redisUtil.lGetListSize(groupId);
 
             //单次获取的消息数量
@@ -82,8 +83,16 @@ public class ChatServer {
             }
 
             //连接建立后返回{listNum}条消息（从list右侧开始输出，获取最新的{listNum}条数据）
-            List<Object> list = redisUtil.lGet(groupId,startPage,endPage);
-            sendMessage(session, list.toString());
+            List<Object> list = redisUtil.lGet("gml:"+groupId,startPage,endPage);
+
+            //封装成MessageList类型
+            MessageList messageList = new MessageList();
+            messageList.setLimitList(list);//返回list的部分消息
+            messageList.setTotal(endPage);//返回redis list的总长度
+
+            //发送消息
+            sendMessage(session, messageList.toString());
+
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -118,7 +127,7 @@ public class ChatServer {
         String jsonStr = JSONObject.toJSON(messageObject).toString();
 
         //将消息插入Redis list中（key为groupId）
-        redisUtil.lSet(groupId,jsonStr,imConfig.getTimeout());
+        redisUtil.lSet("gml:"+groupId,jsonStr,imConfig.getTimeout());
 
         //广播推送消息
         for (Session session: sessionPools.values()) {

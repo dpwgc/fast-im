@@ -3,10 +3,7 @@ package com.dpwgc.fastim.controller;
 import com.dpwgc.fastim.service.MessageService;
 import com.dpwgc.fastim.util.ResultUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping(value = "/message")
@@ -22,7 +19,7 @@ public class MessageController {
      * @param endPage 终止页
      * @return ResultUtil<Object>
      */
-    @RequestMapping(value = "/listMessage",method = RequestMethod.POST)
+    @PostMapping(value = "/listMessage")
     public ResultUtil<Object> listMessage(@RequestParam("groupId") String groupId,
                                           @RequestParam("startPage") long startPage,
                                           @RequestParam("endPage") long endPage) {
@@ -37,7 +34,7 @@ public class MessageController {
      * @param ts 消息创建时间戳（毫秒级）
      * @return ResultUtil<Object>
      */
-    @RequestMapping(value = "/delMessage",method = RequestMethod.POST)
+    @PostMapping(value = "/delMessage")
     public ResultUtil<Object> delMessage(@RequestParam("userId") String userId,
                                          @RequestParam("groupId") String groupId,
                                          @RequestParam("ts") Long ts) {
