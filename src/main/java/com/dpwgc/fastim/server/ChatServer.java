@@ -1,10 +1,10 @@
 package com.dpwgc.fastim.server;
 
 import com.alibaba.fastjson.JSONObject;
+import com.dpwgc.fastim.config.IMConfig;
 import com.dpwgc.fastim.dao.MessageObject;
 import com.dpwgc.fastim.util.RedisUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.websocket.*;
@@ -19,21 +19,23 @@ import java.util.concurrent.atomic.AtomicInteger;
  * 群组聊天室连接（监听群内聊天消息更新）
  */
 @ServerEndpoint("/chat/{groupId}/{userId}")
+@Component
 public class ChatServer {
-
-    //消息过期清除时限
-    @Value("${message.timeout}")
-    long timeout;
-    //每次请求获取的消息数量
-    @Value("${message.listNum}")
-    int listNum;
 
     //Redis工具类
     private static RedisUtil redisUtil;
 
+    //IM配置信息加载
+    private static IMConfig imConfig;
+
     @Autowired
     public void setRepository(RedisUtil redisUtil) {
         ChatServer.redisUtil = redisUtil;
+    }
+
+    @Autowired
+    public void setRepository(IMConfig imConfig) {
+        ChatServer.imConfig = imConfig;
     }
 
     //静态变量，用来记录当前在线连接数,线程安全。
@@ -65,9 +67,24 @@ public class ChatServer {
         addOnlineCount();
 
         System.out.println(userId + "加入群组"+groupId+"，当前在线人数为" + onlineNum);
+
         try {
-            //连接建立后返回前{listNum}条消息
-            List<Object> list = redisUtil.lGet(groupId,0,listNum); //TODO listNum无法读取
+            //list的长度（终止页）
+            long endPage = redisUtil.lGetListSize(groupId);
+
+            //单次获取的消息数量
+            long listNum = imConfig.getListNum();
+
+            //计算起始页
+            long startPage = endPage-listNum;
+
+            //如果起始页小于0，将起始页设为0
+            if(startPage < 0){
+                startPage = 0;
+            }
+
+            //连接建立后返回{listNum}条消息（从list右侧开始输出，获取最新的{listNum}条数据）
+            List<Object> list = redisUtil.lGet(groupId,startPage,endPage);
             sendMessage(session, list.toString());
         } catch (IOException e) {
             e.printStackTrace();
@@ -104,7 +121,7 @@ public class ChatServer {
         String jsonStr = JSONObject.toJSON(messageObject).toString();
 
         //将消息插入Redis list中（key为groupId）
-        redisUtil.lSet(groupId,jsonStr,timeout);
+        redisUtil.lSet(groupId,jsonStr,imConfig.getTimeout());
 
         //广播推送消息
         for (Session session: sessionPools.values()) {
@@ -118,9 +135,11 @@ public class ChatServer {
 
     //错误时调用
     @OnError
-    public void onError(Session session, Throwable throwable){
+    public void onError(Session session, Throwable throwable) throws IOException {
         System.out.println("error");
         throwable.printStackTrace();
+        //关闭对话
+        session.close();
     }
 
     public static void addOnlineCount(){
