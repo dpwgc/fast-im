@@ -66,8 +66,6 @@ public class ChatServer {
         sessionPools.put(userId, session);//添加用户
         addOnlineCount();
 
-        System.out.println(userId + "加入群组"+groupId+"，当前在线人数为" + onlineNum);
-
         try {
             //list的长度（终止页）
             long endPage = redisUtil.lGetListSize(groupId);
@@ -99,7 +97,6 @@ public class ChatServer {
     public void onClose(@PathParam(value = "userId") String userId){
         sessionPools.remove(userId);//删除用户
         subOnlineCount();
-        System.out.println(userId + "断开WebSocket连接，当前在线人数为" + onlineNum);
     }
 
     /**
@@ -111,7 +108,7 @@ public class ChatServer {
     @OnMessage
     public void onMessage(String message,@PathParam(value = "userId") String userId,@PathParam(value = "groupId") String groupId) {
 
-        //创建消息模板对象
+        //创建消息模板
         MessageObject messageObject = new MessageObject();
         messageObject.setUserId(userId);
         messageObject.setInfo(message);
@@ -136,7 +133,6 @@ public class ChatServer {
     //错误时调用
     @OnError
     public void onError(Session session, Throwable throwable) throws IOException {
-        System.out.println("error");
         throwable.printStackTrace();
         //关闭对话
         session.close();
