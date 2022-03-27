@@ -17,7 +17,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * 首页群组列表连接（监听用户所加入的群组列表数据更新）
+ * 首页群组列表连接（监听用户加入的所有群组数据更新）
  */
 @ServerEndpoint("/group/list/{userId}")
 @Component
