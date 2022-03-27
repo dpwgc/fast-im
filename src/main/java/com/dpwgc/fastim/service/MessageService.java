@@ -19,7 +19,7 @@ public class MessageService {
     ObjectMapper objectMapper;
 
     //消息过期清除时限
-    @Value("${message.recallTimeLimit}")
+    @Value("${im.recallTimeLimit}")
     long recallTimeLimit;
 
     /**
