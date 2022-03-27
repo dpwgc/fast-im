@@ -1,6 +1,6 @@
 # Fast-IM
 
-## 基于Spring Boot + WebSocket + Redis的精简临时群聊系统
+## 基于Spring Boot + WebSocket + Redis的临时群聊系统
 
 * 使用WebSocet进行消息广播。
 * 使用Redis list存储群聊消息，key为 "gml:"+群组id，value为群组消息列表（JSON格式）。
