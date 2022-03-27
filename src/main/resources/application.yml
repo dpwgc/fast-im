@@ -27,4 +27,4 @@ im:
     recallTimeLimit: 120
   groupList:
     #群组列表信息更新数量（每{updateRate}秒更新一次）
-    updateRate:
+    updateRate: 1

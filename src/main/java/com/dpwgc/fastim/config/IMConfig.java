@@ -24,7 +24,7 @@ public class IMConfig implements InitializingBean {
 
     private static long TIMEOUT;
     private static long LISTNUM;
-    private static long UPDATERATE;
+    private static int UPDATERATE;
 
     /**
      * spring boot项目启动后自动执行
@@ -46,6 +46,6 @@ public class IMConfig implements InitializingBean {
     }
 
     public int getUpdateRate() {
-        return updateRate;
+        return UPDATERATE;
     }
 }

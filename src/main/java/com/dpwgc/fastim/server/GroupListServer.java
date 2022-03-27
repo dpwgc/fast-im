@@ -1,10 +1,7 @@
 package com.dpwgc.fastim.server;
 
-import com.alibaba.fastjson.JSONObject;
 import com.dpwgc.fastim.config.IMConfig;
 import com.dpwgc.fastim.dao.Group;
-import com.dpwgc.fastim.dao.MessageList;
-import com.dpwgc.fastim.dao.MessageObject;
 import com.dpwgc.fastim.util.RedisUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -22,9 +19,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * 首页群组列表连接（监听用户所加入的群组列表数据更新）
  */
-@ServerEndpoint("/list/{userId}")
+@ServerEndpoint("/group/list/{userId}")
 @Component
-public class ListServer {
+public class GroupListServer {
 
     //Redis工具类
     private static RedisUtil redisUtil;
@@ -39,12 +36,12 @@ public class ListServer {
 
     @Autowired
     public void setRepository(RedisUtil redisUtil) {
-        ListServer.redisUtil = redisUtil;
+        GroupListServer.redisUtil = redisUtil;
     }
 
     @Autowired
     public void setRepository(IMConfig imConfig) {
-        ListServer.imConfig = imConfig;
+        GroupListServer.imConfig = imConfig;
     }
 
     //静态变量，用来记录当前在线连接数,线程安全。
@@ -86,12 +83,12 @@ public class ListServer {
                 //群组列表
                 List<Group> groups = new ArrayList<>();
 
-                //遍历数组，获取群组最新消息总数和最新消息
+                //遍历数组，获取每个群组的最新消息总数和最新消息
                 for(int i=0;i<set.size();i++){
                     //获取群组消息总数
                     long size = redisUtil.lGetListSize("gml:"+arr[i].toString());
-                    //获取群组最新消息
-                    Object msg = redisUtil.lGetIndex("gml:"+arr[i].toString(),size);
+                    //获取群组最新消息（即list最末端元素）
+                    Object msg = redisUtil.lGetIndex("gml:"+arr[i].toString(),-1);
 
                     //将数据添加进群组列表
                     Group group = new Group();
@@ -100,11 +97,12 @@ public class ListServer {
                     groups.add(group);
                 }
 
+                //向前端发送用户群组列表
                 sendInfo(userId,groups.toString());
 
                 //每隔一段时间更新一次
                 try {
-                    Thread.sleep(imConfig.getUpdateRate());
+                    Thread.sleep(imConfig.getUpdateRate()*1000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }

@@ -25,9 +25,9 @@ public class MessageList {
 
     @Override
     public String toString() {
-        return "MessageList{" +
-                "limitList=" + limitList +
-                ", total=" + total +
+        return "{" +
+                "limitList:" + limitList +
+                ", total:" + total +
                 '}';
     }
 }

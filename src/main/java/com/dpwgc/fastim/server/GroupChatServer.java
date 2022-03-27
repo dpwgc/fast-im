@@ -19,9 +19,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * 群组聊天室连接（监听群内聊天消息更新）
  */
-@ServerEndpoint("/chat/{groupId}/{userId}")
+@ServerEndpoint("/group/chat/{groupId}/{userId}")
 @Component
-public class ChatServer {
+public class GroupChatServer {
 
     //Redis工具类
     private static RedisUtil redisUtil;
@@ -31,12 +31,12 @@ public class ChatServer {
 
     @Autowired
     public void setRepository(RedisUtil redisUtil) {
-        ChatServer.redisUtil = redisUtil;
+        GroupChatServer.redisUtil = redisUtil;
     }
 
     @Autowired
     public void setRepository(IMConfig imConfig) {
-        ChatServer.imConfig = imConfig;
+        GroupChatServer.imConfig = imConfig;
     }
 
     //静态变量，用来记录当前在线连接数,线程安全。
@@ -69,7 +69,7 @@ public class ChatServer {
 
         try {
             //list的总长度（终止页）
-            long endPage = redisUtil.lGetListSize(groupId);
+            long endPage = redisUtil.lGetListSize("gml:"+groupId);
 
             //单次获取的消息数量
             long listNum = imConfig.getListNum();
@@ -81,6 +81,9 @@ public class ChatServer {
             if(startPage < 0){
                 startPage = 0;
             }
+
+            //更新用户加入的群组集合
+            redisUtil.sSet("ugs:"+userId,groupId);
 
             //连接建立后返回{listNum}条消息（从list右侧开始输出，获取最新的{listNum}条数据）
             List<Object> list = redisUtil.lGet("gml:"+groupId,startPage,endPage);

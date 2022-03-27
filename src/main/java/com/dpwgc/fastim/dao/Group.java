@@ -23,9 +23,9 @@ public class Group {
 
     @Override
     public String toString() {
-        return "Group{" +
-                "newMessage=" + newMessage +
-                ", total=" + total +
+        return "{" +
+                "newMessage:" + newMessage +
+                ", total:" + total +
                 '}';
     }
 }
