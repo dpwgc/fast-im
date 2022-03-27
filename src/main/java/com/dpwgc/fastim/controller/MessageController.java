@@ -5,6 +5,10 @@ import com.dpwgc.fastim.util.ResultUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+/**
+ * 消息类接口
+ */
+@CrossOrigin
 @RestController
 @RequestMapping(value = "/message")
 public class MessageController {

@@ -5,7 +5,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * IM配置信息获取，主要是给server/ChatServer类使用
+ * IM配置信息获取，主要是给server/GroupChatServer类使用（因为websocket类中无法使用@value注解接收配置参数）
  */
 @Configuration
 public class IMConfig implements InitializingBean {
@@ -22,9 +22,14 @@ public class IMConfig implements InitializingBean {
     @Value("${im.groupList.updateRate}")
     private int updateRate;
 
+    //连接建立后是否自动加入群组
+    @Value("${im.group.autoJoin}")
+    private int autoJoin;
+
     private static long TIMEOUT;
     private static long LISTNUM;
     private static int UPDATERATE;
+    private static int AUTOJOIN;
 
     /**
      * spring boot项目启动后自动执行
@@ -35,6 +40,7 @@ public class IMConfig implements InitializingBean {
         TIMEOUT = timeout;
         LISTNUM = listNum;
         UPDATERATE = updateRate;
+        AUTOJOIN = autoJoin;
     }
 
     public long getTimeout(){
@@ -47,5 +53,9 @@ public class IMConfig implements InitializingBean {
 
     public int getUpdateRate() {
         return UPDATERATE;
+    }
+
+    public int getAutoJoin() {
+        return AUTOJOIN;
     }
 }

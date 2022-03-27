@@ -9,6 +9,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import java.util.List;
 
+/**
+ * 消息类服务
+ */
 @Service
 public class MessageService {
 

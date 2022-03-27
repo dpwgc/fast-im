@@ -13,6 +13,7 @@ import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
 import java.io.IOException;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -82,8 +83,32 @@ public class GroupChatServer {
                 startPage = 0;
             }
 
-            //更新用户加入的群组集合（将该群组添加进用户群组集合）
-            redisUtil.sSet("ugs:"+userId,groupId);
+            //是否自动加群
+            if(imConfig.getAutoJoin() == 1) {
+                //更新用户加入的群组集合（如果用户在此前没有加入该群组，则自动将该群组添加进用户群组集合）
+                redisUtil.sSet("ugs:"+userId,groupId);
+            }
+
+            //获取用户加入的群组集合
+            Set<Object> set = redisUtil.sGet("ugs:"+userId);
+            //集合转数组
+            Object[] arr = set.toArray();
+            //遍历用户加入的群组列表，查看用户是否加入该群
+            for(int i=0;i<set.size();i++){
+
+                //如果用户已经加入该群聊
+                if(arr[i].toString().equals(groupId)){
+                    break;
+                }
+
+                //如果遍历到末尾还未匹配到群号，则判定用户没有加入该群
+                if(i == set.size()-1) {
+                    sessionPools.remove(userId);//删除用户
+                    subOnlineCount();
+                    session.close();//断开连接
+                    return;
+                }
+            }
 
             //连接建立后返回{listNum}条消息（从list右侧开始输出，获取最新的{listNum}条数据）
             List<Object> list = redisUtil.lGet("gml:"+groupId,startPage,endPage);
