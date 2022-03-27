@@ -1,7 +1,7 @@
 package com.dpwgc.fastim.dao;
 
 /**
- * 消息模板
+ * 消息对象模板
  */
 public class MessageObject {
 

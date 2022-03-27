@@ -1,6 +1,9 @@
 package com.dpwgc.fastim.dao;
 
-public class Group {
+/**
+ * 群组模板
+ */
+public class GroupObject {
 
     private Object newMessage;
     private long total;

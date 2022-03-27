@@ -1,7 +1,7 @@
 package com.dpwgc.fastim.server;
 
 import com.dpwgc.fastim.config.IMConfig;
-import com.dpwgc.fastim.dao.Group;
+import com.dpwgc.fastim.dao.GroupObject;
 import com.dpwgc.fastim.util.RedisUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -80,8 +80,8 @@ public class GroupListServer {
                 Set<Object> set = redisUtil.sGet("ugs:"+userId);
                 //集合转数组
                 Object[] arr = set.toArray();
-                //群组列表
-                List<Group> groups = new ArrayList<>();
+                //群组对象列表
+                List<GroupObject> groupObjects = new ArrayList<>();
 
                 //遍历数组，获取每个群组的最新消息总数和最新消息
                 for(int i=0;i<set.size();i++){
@@ -90,15 +90,15 @@ public class GroupListServer {
                     //获取群组最新消息（即list最末端元素）
                     Object msg = redisUtil.lGetIndex("gml:"+arr[i].toString(),-1);
 
-                    //将数据添加进群组列表
-                    Group group = new Group();
-                    group.setNewMessage(msg);
-                    group.setTotal(size);
-                    groups.add(group);
+                    //将数据添加进群组对象列表
+                    GroupObject groupObject = new GroupObject();
+                    groupObject.setNewMessage(msg);
+                    groupObject.setTotal(size);
+                    groupObjects.add(groupObject);
                 }
 
-                //向前端发送用户群组列表
-                sendInfo(userId,groups.toString());
+                //向前端发送用户群组列表GroupList
+                sendInfo(userId, groupObjects.toString());
 
                 //每隔一段时间更新一次
                 try {

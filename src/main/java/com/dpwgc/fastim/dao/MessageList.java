@@ -2,9 +2,15 @@ package com.dpwgc.fastim.dao;
 
 import java.util.List;
 
+/**
+ * 消息列表封装模板
+ */
 public class MessageList {
 
-    private List<Object> limitList;
+    //群组部分消息列表
+    private List<Object> list;
+
+    //群组消息总数
     private long total;
 
     public void setTotal(long total) {
@@ -15,18 +21,18 @@ public class MessageList {
         return total;
     }
 
-    public void setLimitList(List<Object> limitList) {
-        this.limitList = limitList;
+    public void setList(List<Object> list) {
+        this.list = list;
     }
 
-    public List<Object> getLimitList() {
-        return limitList;
+    public List<Object> getList() {
+        return list;
     }
 
     @Override
     public String toString() {
         return "{" +
-                "limitList:" + limitList +
+                "list:" + list +
                 ", total:" + total +
                 '}';
     }

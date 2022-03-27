@@ -18,7 +18,8 @@
    * MessageController `消息操作接口`
    * UserController `用户操作接口`
 * dao `模板层`
-   * Group `群组对象`
+   * GroupList `群组列表封装`
+   * GroupObject `群组对象`
    * MessageList `消息列表封装`
    * MessageObject `消息对象`
 * server `websocket服务层`

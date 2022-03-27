@@ -82,7 +82,7 @@ public class GroupChatServer {
                 startPage = 0;
             }
 
-            //更新用户加入的群组集合
+            //更新用户加入的群组集合（将该群组添加进用户群组集合）
             redisUtil.sSet("ugs:"+userId,groupId);
 
             //连接建立后返回{listNum}条消息（从list右侧开始输出，获取最新的{listNum}条数据）
@@ -90,7 +90,7 @@ public class GroupChatServer {
 
             //封装成MessageList类型
             MessageList messageList = new MessageList();
-            messageList.setLimitList(list);//返回list的部分消息
+            messageList.setList(list);//返回list的部分消息
             messageList.setTotal(endPage);//返回redis list的总长度
 
             //发送消息
