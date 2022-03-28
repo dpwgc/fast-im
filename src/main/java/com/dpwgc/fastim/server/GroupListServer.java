@@ -84,6 +84,9 @@ public class GroupListServer {
         @Override
         public void run() {
 
+            //上一次循环各个群组的消息总数之和
+            long allGroupMsgTotal_ed = 0;
+
             while (flag) {
                 //获取用户加入的群组集合
                 Set<Object> set = redisUtil.sGet("ugs:"+userId);
@@ -92,24 +95,37 @@ public class GroupListServer {
                 //群组对象列表
                 List<GroupObject> groupObjects = new ArrayList<>();
 
+                //各个群组的消息总数之和
+                long allGroupMsgTotal = 0;
+
                 //遍历数组，获取每个群组的最新消息总数和最新消息
                 for(int i=0;i<set.size();i++){
                     //获取群组消息总数
-                    long size = redisUtil.lGetListSize("gml:"+arr[i].toString());
+                    long total = redisUtil.lGetListSize("gml:"+arr[i].toString());
                     //获取群组最新消息（即list最末端元素）
                     Object msg = redisUtil.lGetIndex("gml:"+arr[i].toString(),-1);
+
+                    //消息总数累加
+                    allGroupMsgTotal = allGroupMsgTotal + total;
 
                     //将数据添加进群组对象列表
                     GroupObject groupObject = new GroupObject();
                     groupObject.setNewMessage(msg);
-                    groupObject.setTotal(size);
+                    groupObject.setTotal(total);
                     groupObjects.add(groupObject);
                 }
 
-                //向前端发送用户群组列表GroupList
-                sendInfo(userId, groupObjects.toString());
+                //如果所有群聊的消息总数发生了变化，则表明用户群组列表中有新的消息到达
+                if(allGroupMsgTotal != allGroupMsgTotal_ed) {
 
-                //每隔一段时间更新一次
+                    //更新allGroupMsgTotal_ed
+                    allGroupMsgTotal_ed = allGroupMsgTotal;
+
+                    //向前端发送用户群组列表GroupList
+                    sendInfo(userId, groupObjects.toString());
+                }
+
+                //每隔一段时间检测一次消息更新
                 try {
                     Thread.sleep(imConfig.getUpdateRate()*1000);
                 } catch (InterruptedException e) {
