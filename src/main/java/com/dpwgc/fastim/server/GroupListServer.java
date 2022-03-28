@@ -125,12 +125,15 @@ public class GroupListServer {
      * @param userId 用户id
      */
     @OnOpen
-    public void onOpen(Session session,@PathParam(value = "token") String token, @PathParam(value = "userId") String userId){
+    public void onOpen(Session session,@PathParam(value = "token") String token, @PathParam(value = "userId") String userId) throws IOException {
 
         //如果开启了用户登录状态检测
         if(imConfig.getAutoJoin() == 1) {
             //验证用户登录状态
-            loginUtil.loginCheck(userId,token);
+            if(!loginUtil.loginCheck(userId,token)){
+                session.close();//断开连接
+                return;
+            }
         }
 
         sessionPools.put(userId, session);//添加用户

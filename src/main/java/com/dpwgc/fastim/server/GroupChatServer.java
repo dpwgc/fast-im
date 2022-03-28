@@ -72,12 +72,15 @@ public class GroupChatServer {
      * @param groupId 群组id
      */
     @OnOpen
-    public void onOpen(Session session,@PathParam(value = "token") String token, @PathParam(value = "userId") String userId,@PathParam(value = "groupId") String groupId){
+    public void onOpen(Session session,@PathParam(value = "token") String token, @PathParam(value = "userId") String userId,@PathParam(value = "groupId") String groupId) throws IOException {
 
         //如果开启了用户登录状态检测
         if(imConfig.getAutoJoin() == 1) {
             //验证用户登录状态
-            loginUtil.loginCheck(userId,token);
+            if(!loginUtil.loginCheck(userId,token)){
+                session.close();//断开连接
+                return;
+            }
         }
 
         sessionPools.put(userId, session);//添加用户
@@ -163,7 +166,11 @@ public class GroupChatServer {
         //如果开启了用户登录状态检测
         if(imConfig.getAutoJoin() == 1) {
             //验证用户登录状态
-            loginUtil.loginCheck(userId,token);
+            if(!loginUtil.loginCheck(userId,token)){
+                sessionPools.remove(userId);//删除用户
+                subOnlineCount();
+                return;
+            }
         }
 
         //创建消息模板
