@@ -26,10 +26,15 @@ public class IMConfig implements InitializingBean {
     @Value("${im.group.autoJoin}")
     private int autoJoin;
 
+    //连接建立后是否校验用户登录状态
+    @Value("${im.group.loginAuth}")
+    private int loginAuth;
+
     private static long TIMEOUT;
     private static long LISTNUM;
     private static int UPDATERATE;
     private static int AUTOJOIN;
+    private static int LOGINAUTH;
 
     /**
      * spring boot项目启动后自动执行
@@ -57,5 +62,9 @@ public class IMConfig implements InitializingBean {
 
     public int getAutoJoin() {
         return AUTOJOIN;
+    }
+
+    public int getLoginAuth() {
+        return LOGINAUTH;
     }
 }

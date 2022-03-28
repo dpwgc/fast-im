@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.dpwgc.fastim.config.IMConfig;
 import com.dpwgc.fastim.dao.MessageList;
 import com.dpwgc.fastim.dao.MessageObject;
+import com.dpwgc.fastim.util.LoginUtil;
 import com.dpwgc.fastim.util.RedisUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -20,7 +21,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * 群组聊天室连接（监听群内聊天消息更新）
  */
-@ServerEndpoint("/group/chat/{groupId}/{userId}")
+@ServerEndpoint("/group/chat/{groupId}/{userId}/{token}")
 @Component
 public class GroupChatServer {
 
@@ -30,6 +31,9 @@ public class GroupChatServer {
     //IM配置信息加载
     private static IMConfig imConfig;
 
+    //登录状态检查
+    private static LoginUtil loginUtil;
+
     @Autowired
     public void setRepository(RedisUtil redisUtil) {
         GroupChatServer.redisUtil = redisUtil;
@@ -38,6 +42,11 @@ public class GroupChatServer {
     @Autowired
     public void setRepository(IMConfig imConfig) {
         GroupChatServer.imConfig = imConfig;
+    }
+
+    @Autowired
+    public void setRepository(LoginUtil loginUtil) {
+        GroupChatServer.loginUtil = loginUtil;
     }
 
     //静态变量，用来记录当前在线连接数,线程安全。
@@ -63,7 +72,13 @@ public class GroupChatServer {
      * @param groupId 群组id
      */
     @OnOpen
-    public void onOpen(Session session, @PathParam(value = "userId") String userId,@PathParam(value = "groupId") String groupId){
+    public void onOpen(Session session,@PathParam(value = "token") String token, @PathParam(value = "userId") String userId,@PathParam(value = "groupId") String groupId){
+
+        //如果开启了用户登录状态检测
+        if(imConfig.getAutoJoin() == 1) {
+            //验证用户登录状态
+            loginUtil.loginCheck(userId,token);
+        }
 
         sessionPools.put(userId, session);//添加用户
         addOnlineCount();
@@ -143,7 +158,13 @@ public class GroupChatServer {
      * @param groupId 群组id
      */
     @OnMessage
-    public void onMessage(String message,@PathParam(value = "userId") String userId,@PathParam(value = "groupId") String groupId) {
+    public void onMessage(String message,@PathParam(value = "token") String token, @PathParam(value = "userId") String userId,@PathParam(value = "groupId") String groupId) {
+
+        //如果开启了用户登录状态检测
+        if(imConfig.getAutoJoin() == 1) {
+            //验证用户登录状态
+            loginUtil.loginCheck(userId,token);
+        }
 
         //创建消息模板
         MessageObject messageObject = new MessageObject();

@@ -19,6 +19,8 @@ spring:
 #IM配置
 im:
   group:
+    #进行websocket连接后是否校验用户登录状态（登录验证，比对userId & token。1：开启，0：关闭）
+    loginAuth: 0
     #用户是否在websocket连接建立时自动加入群组（1：是，0：否），如果为否，则需要先调用http接口/group/joinGroup让用户加入群组，再建立连接
     autoJoin: 1
   groupMessage:

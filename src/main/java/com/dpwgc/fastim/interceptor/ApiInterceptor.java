@@ -4,7 +4,6 @@ import com.alibaba.fastjson.JSONObject;
 import com.dpwgc.fastim.util.RedisUtil;
 import com.dpwgc.fastim.util.ResultUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
 

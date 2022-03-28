@@ -2,6 +2,7 @@ package com.dpwgc.fastim.server;
 
 import com.dpwgc.fastim.config.IMConfig;
 import com.dpwgc.fastim.dao.GroupObject;
+import com.dpwgc.fastim.util.LoginUtil;
 import com.dpwgc.fastim.util.RedisUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -19,7 +20,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * 首页群组列表连接（监听用户加入的所有群组数据更新）
  */
-@ServerEndpoint("/group/list/{userId}")
+@ServerEndpoint("/group/list/{userId}/{token}")
 @Component
 public class GroupListServer {
 
@@ -28,6 +29,9 @@ public class GroupListServer {
 
     //IM配置信息加载
     private static IMConfig imConfig;
+
+    //登录状态检查
+    private static LoginUtil loginUtil;
 
     //是否继续监听
     private volatile boolean flag;
@@ -42,6 +46,11 @@ public class GroupListServer {
     @Autowired
     public void setRepository(IMConfig imConfig) {
         GroupListServer.imConfig = imConfig;
+    }
+
+    @Autowired
+    public void setRepository(LoginUtil loginUtil) {
+        GroupListServer.loginUtil = loginUtil;
     }
 
     //静态变量，用来记录当前在线连接数,线程安全。
@@ -116,7 +125,13 @@ public class GroupListServer {
      * @param userId 用户id
      */
     @OnOpen
-    public void onOpen(Session session, @PathParam(value = "userId") String userId){
+    public void onOpen(Session session,@PathParam(value = "token") String token, @PathParam(value = "userId") String userId){
+
+        //如果开启了用户登录状态检测
+        if(imConfig.getAutoJoin() == 1) {
+            //验证用户登录状态
+            loginUtil.loginCheck(userId,token);
+        }
 
         sessionPools.put(userId, session);//添加用户
         addOnlineCount();
