@@ -17,6 +17,19 @@ public class UserController {
     UserService userService;
 
     /**
+     * 用户登录（根据业务自定义）
+     * @param userId 用户id
+     * @param password 密码
+     * @return ResultUtil<Object>
+     */
+    @PostMapping("/login")
+    public ResultUtil<Object> login(@RequestParam("userId") String userId,
+                                    @RequestParam("password") String password) {
+
+        return userService.login(userId,password);
+    }
+
+    /**
      * 用户加入群组
      * @param userId 用户id
      * @param groupId 群组id
