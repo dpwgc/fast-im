@@ -75,7 +75,7 @@ public class GroupChatServer {
     public void onOpen(Session session,@PathParam(value = "token") String token, @PathParam(value = "userId") String userId,@PathParam(value = "groupId") String groupId) throws IOException {
 
         //如果开启了用户登录状态检测
-        if(imConfig.getAutoJoin() == 1) {
+        if(imConfig.getLoginAuth() == 1) {
             //验证用户登录状态
             if(!loginUtil.loginCheck(userId,token)){
                 session.close();//断开连接
@@ -164,7 +164,7 @@ public class GroupChatServer {
     public void onMessage(String message,@PathParam(value = "token") String token, @PathParam(value = "userId") String userId,@PathParam(value = "groupId") String groupId) {
 
         //如果开启了用户登录状态检测
-        if(imConfig.getAutoJoin() == 1) {
+        if(imConfig.getLoginAuth() == 1) {
             //验证用户登录状态
             if(!loginUtil.loginCheck(userId,token)){
                 sessionPools.remove(userId);//删除用户

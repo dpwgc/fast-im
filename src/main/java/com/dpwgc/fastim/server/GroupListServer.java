@@ -128,7 +128,7 @@ public class GroupListServer {
     public void onOpen(Session session,@PathParam(value = "token") String token, @PathParam(value = "userId") String userId) throws IOException {
 
         //如果开启了用户登录状态检测
-        if(imConfig.getAutoJoin() == 1) {
+        if(imConfig.getLoginAuth() == 1) {
             //验证用户登录状态
             if(!loginUtil.loginCheck(userId,token)){
                 session.close();//断开连接
