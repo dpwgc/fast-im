@@ -46,6 +46,7 @@ public class IMConfig implements InitializingBean {
         LISTNUM = listNum;
         UPDATERATE = updateRate;
         AUTOJOIN = autoJoin;
+        LOGINAUTH = loginAuth;
     }
 
     public long getTimeout(){
