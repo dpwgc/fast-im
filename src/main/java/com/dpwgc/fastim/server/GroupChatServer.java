@@ -205,10 +205,14 @@ public class GroupChatServer {
         //将消息插入Redis list中（key为groupId）
         redisUtil.lSet("gml:"+groupId,jsonStr,imConfig.getTimeout());
 
-        //广播推送消息
+        //在群内广播推送消息
         for (Session session: sessionPools.values()) {
             try {
-                sendMessage(session, jsonStr);
+                //如果是群组id相同的连接
+                if(session.getPathParameters().get("groupId").equals(groupId)){
+                    //向其推送消息
+                    sendMessage(session, jsonStr);
+                }
             } catch(Exception e){
                 e.printStackTrace();
             }
