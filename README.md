@@ -23,6 +23,10 @@
 * 启动项目。
 
 ***
+## 自定义业务逻辑
+* 可在controller/UserController及service/UserService文件中自定义用户登录逻辑。
+* 可在config/InterceptorConfig及interceptor/ApiInterceptor文件中自定义http接口拦截器及拦截路由。
+***
 
 ## WebSocket连接说明
 
