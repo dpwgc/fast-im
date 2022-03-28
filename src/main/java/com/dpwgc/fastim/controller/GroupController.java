@@ -32,14 +32,14 @@ public class GroupController {
     }
 
     /**
-     * 根据用户id、群组id、及消息创建时间戳撤回指定消息
-     * @param userId 用户id
+     * 用户根据用户id、群组id、及消息创建时间戳撤回指定消息
+     * @header userId 用户id
      * @param groupId 群组id
      * @param ts 消息创建时间戳（毫秒级）
      * @return ResultUtil<Object>
      */
     @PostMapping(value = "/delMessage")
-    public ResultUtil<Object> delMessage(@RequestParam("userId") String userId,
+    public ResultUtil<Object> delMessage(@RequestHeader("userId") String userId,
                                          @RequestParam("groupId") String groupId,
                                          @RequestParam("ts") Long ts) {
 

@@ -1,6 +1,7 @@
 package com.dpwgc.fastim.interceptor;
 
 import com.alibaba.fastjson.JSONObject;
+import com.dpwgc.fastim.util.LoginUtil;
 import com.dpwgc.fastim.util.RedisUtil;
 import com.dpwgc.fastim.util.ResultUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,24 +19,14 @@ import java.io.OutputStream;
 public class ApiInterceptor implements HandlerInterceptor {
 
     @Autowired
-    private RedisUtil redisUtil;
+    private LoginUtil loginUtil;
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         String userId = request.getHeader("userId");
         String token = request.getHeader("token");
-        if (userId==null||token==null||!redisUtil.hasKey("login:"+userId)){
-            returnErrorResponse(response);
-            return false;
-        }
-        String redis_token = (String) redisUtil.get("login:"+userId);
-        if (!token.equals(redis_token)){
-            returnErrorResponse(response);
-            return false;
-        }
-        //验证成功，token存活时间延长24小时
-        redisUtil.set("login:"+userId, token, 60 * 60 * 24);
-        return true;
+        //校验登录状态
+        return loginUtil.loginCheck(userId,token);
     }
 
     @Override

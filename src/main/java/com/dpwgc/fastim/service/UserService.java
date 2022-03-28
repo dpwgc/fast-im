@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Set;
+import java.util.UUID;
 
 /**
  * 用户类服务
@@ -19,16 +20,33 @@ public class UserService {
     /**
      * 用户登录（根据业务自定义）
      * @param userId 用户id
-     * @param password 密码
+     * @param password 用户密码
      * @return ResultUtil<Object>
      */
     public ResultUtil<Object> login(String userId,String password) {
 
         ResultUtil<Object> resultUtil = new ResultUtil<>();
 
-        resultUtil.setCode(200);
-        resultUtil.setMsg("登录成功");
-        resultUtil.setData("user_info & token");
+        System.out.println(userId);
+        System.out.println(password);
+
+        /* 自定义业务处理 */
+        /* --- TODO --- */
+        /* 自定义业务处理 */
+
+        //生成token
+        String token = UUID.randomUUID().toString().replaceAll("-","");
+
+        // 将token存入Redis，设置24小时过期
+        if(redisUtil.set("login:"+userId, token, 60 * 60 * 24)){
+            resultUtil.setCode(200);
+            resultUtil.setMsg(token);           //返回token
+            resultUtil.setData("{user_info}");  //返回用户信息
+            return resultUtil;
+        }
+
+        resultUtil.setCode(100);
+        resultUtil.setMsg("登录失败");
         return resultUtil;
     }
 
