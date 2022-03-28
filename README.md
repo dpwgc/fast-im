@@ -3,6 +3,7 @@
 ## 基于Spring Boot + WebSocket + Redis的临时群聊系统
 
 * 使用WebSocet进行消息广播。
+* 使用Redis string存储用户登录令牌，key为"login:"+用户id，value为token。
 * 使用Redis list存储群聊消息，key为 "gml:"+群组id，value为群组消息列表（JSON格式）。
 * 使用Redis set存储用户加入的群组列表，key为 "ugs:"+用户id，value为用户当前加入的所有群组id集合。
 
@@ -79,7 +80,7 @@
 * `userId:用户id`
 * `token:登录令牌，默认不开启websocket令牌验证，可随意填写一串字符（不能为空）`
 
-连接建立后服务端周期性地向客户端发送群组信息列表（以JSON字符串形式推送），客户端实时更新列表数据，推送数据格式如下：
+连接建立后，服务端将周期性检查用户群组列表中是否有新消息到达，如果有新消息到达，则向客户端发送最新的群组信息列表（以JSON字符串形式推送），推送数据格式如下：
 ```json
 [
   {
