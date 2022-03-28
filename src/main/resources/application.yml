@@ -19,7 +19,7 @@ spring:
 #IM配置
 im:
   group:
-    #用户是否在websocket连接建立时自动加入群组（1：是，0：否），如果为否，则需要先调用http接口/user/joinGroup让用户加入群组，再建立连接
+    #用户是否在websocket连接建立时自动加入群组（1：是，0：否），如果为否，则需要先调用http接口/group/joinGroup让用户加入群组，再建立连接
     autoJoin: 1
   groupMessage:
     #群组消息列表在redis中的最长存储时间（默认一周，如果该群在一周内无人发言，则删除该群组的消息列表）
@@ -29,5 +29,5 @@ im:
     #消息撤回时限（单位：秒，默认2分钟后禁止撤回）
     recallTimeLimit: 120
   groupList:
-    #用户群组列表信息更新数量（每{updateRate}秒更新一次）
+    #用户群组列表信息更新频率（每{updateRate}秒向前端推送一次列表信息）
     updateRate: 1
