@@ -1,5 +1,6 @@
 package com.dpwgc.fastim.service;
 
+import com.alibaba.fastjson.JSON;
 import com.dpwgc.fastim.dao.MessageObject;
 import com.dpwgc.fastim.util.RedisUtil;
 import com.dpwgc.fastim.util.ResultUtil;
@@ -10,10 +11,10 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 /**
- * 消息类服务
+ * 群组类服务
  */
 @Service
-public class MessageService {
+public class GroupService {
 
     @Autowired
     RedisUtil redisUtil;
@@ -69,8 +70,8 @@ public class MessageService {
         //遍历群组消息
         for (Object msg : list) {
 
-            //将JSON字符串转为消息模板对象
-            MessageObject messageObject = objectMapper.convertValue(msg, MessageObject.class);
+            //将Object转为MessageObject
+            MessageObject messageObject = JSON.parseObject(msg.toString(), MessageObject.class);
 
             //通过比对用户id及消息创建时间戳查找到指定消息
             if (messageObject.getUserId().equals(userId) && messageObject.getTs().equals(ts)) {

@@ -1,20 +1,20 @@
 package com.dpwgc.fastim.controller;
 
-import com.dpwgc.fastim.service.MessageService;
+import com.dpwgc.fastim.service.GroupService;
 import com.dpwgc.fastim.util.ResultUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 /**
- * 消息类接口
+ * 群组类接口
  */
 @CrossOrigin
 @RestController
-@RequestMapping(value = "/message")
-public class MessageController {
+@RequestMapping(value = "/group")
+public class GroupController {
 
     @Autowired
-    MessageService messageService;
+    GroupService groupService;
 
     /**
      * 根据群组id返回该群组指定区间的消息列表
@@ -28,7 +28,7 @@ public class MessageController {
                                           @RequestParam("startPage") long startPage,
                                           @RequestParam("endPage") long endPage) {
 
-        return messageService.listMessage(groupId,startPage,endPage);
+        return groupService.listMessage(groupId,startPage,endPage);
     }
 
     /**
@@ -43,6 +43,6 @@ public class MessageController {
                                          @RequestParam("groupId") String groupId,
                                          @RequestParam("ts") Long ts) {
 
-        return messageService.delMessage(userId,groupId,ts);
+        return groupService.delMessage(userId,groupId,ts);
     }
 }
