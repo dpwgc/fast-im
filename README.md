@@ -46,14 +46,14 @@
 
 * 客户端发送
 ```json
-"web hello"
+"im hello"
 ```
 
 * 然后服务端向所有在线的群组成员推送该条消息（以JSON字符串形式推送），格式如下：
 ```json
 {
   "userId":1,
-  "info":"web hello",
+  "info":"im hello",
   "ts":1648380678385
 }
 ```
@@ -88,6 +88,121 @@
 `total:该群组当前消息总数`
 
 ***
+## HTTP接口文档
+
+### 群内消息撤回
+
+#### 接口URL
+> http://127.0.0.1:9000/group/delMessage
+
+#### 请求方式
+> POST
+
+#### Content-Type
+> form-data
+
+#### 请求Body参数
+参数名 | 示例值 | 参数类型 | 是否必填 | 参数描述
+--- | --- | --- | --- | ---
+userId | 1 | Text | 是 | -
+groupId | 1 | Text | 是 | -
+ts | 1648443134344 | Text | 是 | -
+
+#### 成功响应示例
+```json
+{
+	"code": 200,
+	"msg": "撤回消息成功",
+	"data": null
+}
+```
+### 用户加入群聊
+
+#### 接口URL
+> http://127.0.0.1:9000/user/joinGroup
+
+#### 请求方式
+> POST
+
+#### Content-Type
+> form-data
+
+#### 请求Body参数
+参数名 | 示例值 | 参数类型 | 是否必填 | 参数描述
+--- | --- | --- | --- | ---
+userId | 1 | Text | 是 | -
+groupId | 3 | Text | 是 | -
+
+#### 成功响应示例
+```json
+{
+	"code": 200,
+	"msg": "操作成功",
+	"data": null
+}
+```
+### 获取用户加入的群组列表
+
+#### 接口URL
+> http://127.0.0.1:9000/user/listGroup
+
+#### 请求方式
+> POST
+
+#### Content-Type
+> form-data
+
+#### 请求Body参数
+参数名 | 示例值 | 参数类型 | 是否必填 | 参数描述
+--- | --- | --- | --- | ---
+userId | 1 | Text | 是 | -
+
+#### 成功响应示例
+```json
+{
+	"code": 200,
+	"msg": "操作成功",
+	"data": [
+		"3",
+		"2",
+		"1"
+	]
+}
+```
+### 返回群组消息列表
+
+#### 接口URL
+> http://127.0.0.1:9000/group/listMessage
+
+#### 请求方式
+> POST
+
+#### Content-Type
+> form-data
+
+#### 请求Body参数
+参数名 | 示例值 | 参数类型 | 是否必填 | 参数描述
+--- | --- | --- | --- | ---
+groupId | 1 | Text | 是 | -
+startPage | 0 | Text | 是 | -
+endPage | 5 | Text | 是 | -
+
+#### 成功响应示例
+```json
+{
+	"code": 200,
+	"msg": "操作成功",
+	"data": [
+		"{\"userId\":\"1\",\"info\":\"1\",\"ts\":1648368380132}",
+		"{\"userId\":\"1\",\"info\":\"2\",\"ts\":1648368386964}",
+		"{\"userId\":\"1\",\"info\":\"3\",\"ts\":1648368388389}",
+		"{\"userId\":\"1\",\"info\":\"4\",\"ts\":1648368390249}",
+		"{\"userId\":\"1\",\"info\":\"5\",\"ts\":1648368391742}",
+		"{\"userId\":\"1\",\"info\":\"6\",\"ts\":1648368393362}"
+	]
+}
+```
+***
 
 ## 项目结构
 
@@ -96,7 +211,7 @@
    * RedisConfig `Redis配置类`
    * WebSocketConfig `websocket配置类`
 * controller `控制器层`
-   * MessageController `消息操作接口`
+   * GroupController `群组操作接口`
    * UserController `用户操作接口`
 * dao `模板层`
    * GroupObject `群组对象`
@@ -106,11 +221,10 @@
    * GroupChatServer `群组聊天室连接（监听群内聊天消息更新）`
    * GroupListServer `首页群组列表连接（监听用户加入的所有群组数据更新）`
 * service `控制器服务层`
-   * MessageService `消息操作服务`
+   * GroupService `群组操作服务`
    * UserService `用户操作服务`
 * util `工具集合`
    * RedisUtil `Redis工具类`
    * ResultUtil `http请求返回模板`
 * FastimApplication `启动类`
 
-***
