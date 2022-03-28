@@ -26,7 +26,13 @@ public class ApiInterceptor implements HandlerInterceptor {
         String userId = request.getHeader("userId");
         String token = request.getHeader("token");
         //校验登录状态
-        return loginUtil.loginCheck(userId,token);
+        if(loginUtil.loginCheck(userId,token)){
+            //验证通过
+            return true;
+        }
+        //验证失败
+        returnErrorResponse(response);
+        return false;
     }
 
     @Override
