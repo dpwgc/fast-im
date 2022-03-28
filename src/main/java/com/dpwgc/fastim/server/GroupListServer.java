@@ -127,17 +127,23 @@ public class GroupListServer {
     @OnOpen
     public void onOpen(Session session,@PathParam(value = "token") String token, @PathParam(value = "userId") String userId) throws IOException {
 
+        sessionPools.put(userId, session);//添加用户
+        addOnlineCount();
+
         //如果开启了用户登录状态检测
         if(imConfig.getLoginAuth() == 1) {
             //验证用户登录状态
             if(!loginUtil.loginCheck(userId,token)){
+
+                //验证失败，向客户端发送440状态码
+                sendInfo(userId,"440");
+
+                sessionPools.remove(userId);//删除用户
+                subOnlineCount();
                 session.close();//断开连接
                 return;
             }
         }
-
-        sessionPools.put(userId, session);//添加用户
-        addOnlineCount();
 
         this.userId=userId;
         this.flag=true;

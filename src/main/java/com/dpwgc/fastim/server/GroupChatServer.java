@@ -56,6 +56,16 @@ public class GroupChatServer {
     //消息通道
     private static ConcurrentHashMap<String, Session> sessionPools = new ConcurrentHashMap<>();
 
+    //给指定用户发送信息
+    public static void sendInfo(String userId, String message){
+        Session session = sessionPools.get(userId);
+        try {
+            sendMessage(session, message);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
     //发送消息
     public static void sendMessage(Session session, String message) throws IOException {
         if(session != null){
@@ -74,17 +84,23 @@ public class GroupChatServer {
     @OnOpen
     public void onOpen(Session session,@PathParam(value = "token") String token, @PathParam(value = "userId") String userId,@PathParam(value = "groupId") String groupId) throws IOException {
 
+        sessionPools.put(userId, session);//添加用户
+        addOnlineCount();
+
         //如果开启了用户登录状态检测
         if(imConfig.getLoginAuth() == 1) {
             //验证用户登录状态
             if(!loginUtil.loginCheck(userId,token)){
+
+                //验证失败，向客户端发送440状态码
+                sendInfo(userId,"440");
+
+                sessionPools.remove(userId);//删除用户
+                subOnlineCount();
                 session.close();//断开连接
                 return;
             }
         }
-
-        sessionPools.put(userId, session);//添加用户
-        addOnlineCount();
 
         try {
             //list的总长度（终止页）
@@ -167,6 +183,10 @@ public class GroupChatServer {
         if(imConfig.getLoginAuth() == 1) {
             //验证用户登录状态
             if(!loginUtil.loginCheck(userId,token)){
+
+                //验证失败，向客户端发送440状态码
+                sendInfo(userId,"440");
+
                 sessionPools.remove(userId);//删除用户
                 subOnlineCount();
                 return;
