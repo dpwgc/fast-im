@@ -31,5 +31,5 @@ im:
     #消息撤回时限（单位：秒，默认2分钟后禁止撤回）
     recallTimeLimit: 120
   groupList:
-    #用户群组列表信息更新频率（每{updateRate}秒向前端推送一次列表信息）
+    #用户群组列表信息检查频率（每{updateRate}秒检查一次列表信息，如有更新则将最新列表信息推送给客户端）
     updateRate: 1
