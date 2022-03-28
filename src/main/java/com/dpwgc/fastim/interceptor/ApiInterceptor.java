@@ -2,7 +2,6 @@ package com.dpwgc.fastim.interceptor;
 
 import com.alibaba.fastjson.JSONObject;
 import com.dpwgc.fastim.util.LoginUtil;
-import com.dpwgc.fastim.util.RedisUtil;
 import com.dpwgc.fastim.util.ResultUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.servlet.HandlerInterceptor;
