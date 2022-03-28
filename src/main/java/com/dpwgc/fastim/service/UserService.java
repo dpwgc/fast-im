@@ -17,6 +17,22 @@ public class UserService {
     RedisUtil redisUtil;
 
     /**
+     * 用户登录（根据业务自定义）
+     * @param userId 用户id
+     * @param password 密码
+     * @return ResultUtil<Object>
+     */
+    public ResultUtil<Object> login(String userId,String password) {
+
+        ResultUtil<Object> resultUtil = new ResultUtil<>();
+
+        resultUtil.setCode(200);
+        resultUtil.setMsg("登录成功");
+        resultUtil.setData("user_info & token");
+        return resultUtil;
+    }
+
+    /**
      * 用户加入群组
      * @param userId 用户id
      * @param groupId 群组id
