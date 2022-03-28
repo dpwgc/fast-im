@@ -13,7 +13,7 @@ public class LoginUtil {
      * 用户登录状态检查
      * @param userId 用户id
      * @param token 登录令牌
-     * @return
+     * @return boolean
      */
     public boolean loginCheck(String userId,String token) {
         if (userId==null||token==null||!redisUtil.hasKey("login:"+userId)){
@@ -23,7 +23,8 @@ public class LoginUtil {
         if (!token.equals(redis_token)){
             return false;
         }
-        redisUtil.set("login:"+userId, token, 60 * 60 * 12);
+        //验证成功，token存活时间延长24小时
+        redisUtil.set("login:"+userId, token, 60 * 60 * 24);
         return true;
     }
 }

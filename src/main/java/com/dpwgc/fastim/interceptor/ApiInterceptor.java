@@ -33,7 +33,8 @@ public class ApiInterceptor implements HandlerInterceptor {
             returnErrorResponse(response);
             return false;
         }
-        redisUtil.set("login:"+userId, token, 60 * 60 * 12);
+        //验证成功，token存活时间延长24小时
+        redisUtil.set("login:"+userId, token, 60 * 60 * 24);
         return true;
     }
 
