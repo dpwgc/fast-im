@@ -215,6 +215,7 @@ endPage | 5 | Text | 是 | 终止页
 
 * config `配置层`
    * IMConfig `IM基础功能配置`
+   * InterceptorConfig `接口拦截器配置`
    * RedisConfig `Redis配置类`
    * WebSocketConfig `websocket配置类`
 * controller `控制器层`
@@ -224,6 +225,8 @@ endPage | 5 | Text | 是 | 终止页
    * GroupObject `群组对象`
    * MessageList `消息列表封装`
    * MessageObject `消息对象`
+* interceptor `AOP拦截器`
+   * ApiInterceptor `接口拦截器`
 * server `websocket服务层`
    * GroupChatServer `群组聊天室连接（监听群内聊天消息更新）`
    * GroupListServer `首页群组列表连接（监听用户加入的所有群组数据更新）`
