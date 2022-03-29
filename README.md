@@ -25,7 +25,7 @@
 * 部署Redis。
 * 配置application.yml文件中的参数。
 * 启动项目。
-
+* 启动后访问 http://127.0.0.1:9000/test/websocket ，测试WebSocket连接。
 ***
 
 ## 自定义业务逻辑

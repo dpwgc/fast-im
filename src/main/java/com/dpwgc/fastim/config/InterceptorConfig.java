@@ -28,7 +28,8 @@ public class InterceptorConfig implements WebMvcConfigurer {
         InterceptorRegistration registration = registry.addInterceptor(InterceptorBean());
         registration.addPathPatterns("/**");                      //所有路径都被拦截
         registration.excludePathPatterns(                         //添加不拦截路径
-                "/user/login"
+                "/user/login",
+                "/test/websocket"
         );
     }
 
