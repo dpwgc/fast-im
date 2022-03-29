@@ -32,7 +32,24 @@ public class GroupController {
     }
 
     /**
-     * 用户根据用户id、群组id、及消息创建时间戳撤回指定消息
+     * 用户根据用户id、群组id、及消息创建时间戳获取指定消息之前的历史消息列表（同步历史消息）
+     * @param userId 用户id
+     * @param groupId 群组id
+     * @param ts 消息创建时间戳（毫秒级）
+     * @param count 要获取的消息数量
+     * @return ResultUtil<Object>
+     */
+    @PostMapping(value = "/listOldMessage")
+    public ResultUtil<Object> listOldMessage(@RequestParam("userId") String userId,
+                                         @RequestParam("groupId") String groupId,
+                                         @RequestParam("ts") Long ts,
+                                         @RequestParam("count") long count) {
+
+        return groupService.listOldMessage(userId,groupId,ts,count);
+    }
+
+    /**
+     * 用户根据自己的id、群组id、及消息创建时间戳撤回指定消息
      * @header userId 用户id
      * @param groupId 群组id
      * @param ts 消息创建时间戳（毫秒级）

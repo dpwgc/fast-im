@@ -59,7 +59,7 @@ public class GroupChatServer {
         GroupChatServer.redisMessageListenerContainer = redisMessageListenerContainer;
     }
 
-    //Redis订阅推送消息服务（仅在本类加载时调用一次）
+    //Redis订阅推送消息服务（设为静态，仅在本类加载时调用一次）
     private static RedisListenServer redisListenServer = new RedisListenServer();
 
     //concurrent包的线程安全Set，用来存放每个客户端对应的WebSocketServer对象。
@@ -110,19 +110,6 @@ public class GroupChatServer {
         }
 
         try {
-            //list的总长度（终止页）
-            long endPage = redisUtil.lGetListSize("gml:"+groupId);
-
-            //单次获取的消息数量
-            long listNum = imConfig.getListNum();
-
-            //计算起始页
-            long startPage = endPage-listNum;
-
-            //如果起始页小于0，将起始页设为0
-            if(startPage < 0){
-                startPage = 0;
-            }
 
             //是否自动加群
             if(imConfig.getAutoJoin() == 1) {
@@ -150,7 +137,18 @@ public class GroupChatServer {
                 }
             }
 
-            //连接建立后返回{listNum}条消息（从list右侧开始输出，获取最新的{listNum}条数据）
+            //list的总长度（终止页）
+            long endPage = redisUtil.lGetListSize("gml:"+groupId);
+            //单次获取的消息数量
+            long listNum = imConfig.getListNum();
+            //计算起始页
+            long startPage = endPage-listNum;
+            //如果起始页小于0，将起始页设为0
+            if(startPage < 0){
+                startPage = 0;
+            }
+
+            //连接建立后返回{listNum}条消息（从list右侧截取消息列表，获取最新的{listNum}条数据）
             List<Object> list = redisUtil.lGet("gml:"+groupId,startPage,endPage);
 
             //封装成MessageList类型

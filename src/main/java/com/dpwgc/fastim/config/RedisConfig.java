@@ -9,7 +9,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.listener.PatternTopic;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.data.redis.listener.adapter.MessageListenerAdapter;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
@@ -21,7 +20,10 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 @Configuration
 public class RedisConfig {
 
-    @Bean("container")
+    /**
+     * Redis监听器配置
+     */
+    @Bean
     RedisMessageListenerContainer container(RedisConnectionFactory connectionFactory,
                                             MessageListenerAdapter listenerAdapter) {
 
@@ -30,8 +32,6 @@ public class RedisConfig {
         //设置存储的节点
         lettuceConnectionFactory.setDatabase(0);
         container.setConnectionFactory(lettuceConnectionFactory);
-        //设置要监听的主题
-        //container.addMessageListener(listenerAdapter, new PatternTopic("mq"));
         return container;
     }
 

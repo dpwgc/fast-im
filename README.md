@@ -1,21 +1,24 @@
 # Fast-IM
 
-## 基于Spring Boot + WebSocket + Redis的分布式临时群聊系统
+## 基于Spring Boot + WebSocket + Redis的分布式即时通讯群聊系统
 
-* 使用WebSocet连接服务端与客户端。
+* 使用WebSocet连接IM服务端与客户端。
 * 使用Redis string存储用户登录令牌，key为"login:"+用户id，value为token。
 * 使用Redis list存储群聊消息，key为 "gml:"+群组id，value为群组消息列表（JSON格式）。
 * 使用Redis set存储用户加入的群组列表，key为 "ugs:"+用户id，value为用户当前加入的所有群组id集合。
 * 使用Redis pub/sub订阅发布功能实现分布式WebSocket推送服务，订阅发布主题管道名称为 "mq:"+群组id（每个群组单独共享一个主题）。
+
 ***
+
 ## 实现功能
-* 分布式WebSocket推送服务。
-* 临时群聊搭建。
-* 自动清除废弃的群聊。
-* 实时推送用户所加入的群组列表的最新信息。
-* 用户登录状态验证。
-* 广播推送消息。
-* 撤回消息。
+* 分布式WebSocket推送服务（基于Redis订阅/发布功能及WebSocket连接实现）。
+* 临时群聊快速搭建（适用于直播间聊天、游戏内聊天）。
+* 群聊历史聊天记录查询（HTTP接口实现）。
+* 自动清除长期废弃的群聊（基于Redis键值过期功能）。
+* 实时推送用户所加入的群组列表的最新动态（WebSocket连接实现）。
+* 用户登录状态验证（Redis Token）。
+* 一定时间内的消息撤回功能（HTTP接口实现）。
+
 ***
 
 ## 使用说明
@@ -24,9 +27,21 @@
 * 启动项目。
 
 ***
+
 ## 自定义业务逻辑
 * 可在controller/UserController及service/UserService文件中自定义用户登录逻辑。
 * 可在config/InterceptorConfig及interceptor/ApiInterceptor文件中自定义http接口拦截器及拦截路由。
+
+***
+
+## 消息模板说明
+```
+groupId:消息所属群组id
+userId:发送该条消息的用户id
+info:消息主体内容
+ts:消息创建时间戳（毫秒级）
+```
+为了省内存，没有消息唯一id/uuid，查询某条消息时，按照groupId、userId、ts这三个字段来匹配消息。先根据groupId查找到指定Redis list，再根据userId和ts查找到list中的指定消息（ps：即使有人在同一毫秒内向某群组插入了两条消息，也无大碍，只会略微影响消息撤回功能及获取历史消息记录功能）。
 ***
 
 ## WebSocket连接说明
@@ -75,6 +90,7 @@
 然后服务端向所有在线的群组成员推送该条消息（以JSON字符串形式推送），格式如下：
 ```json
 {
+  "groupId":"1",
   "userId":1,
   "info":"im hello",
   "ts":1648380678385
@@ -188,7 +204,46 @@ endPage | 5 | Text | 是 | 终止页
 }
 ```
 
-### 用户撤回群聊消息
+### 返回指定消息之前的历史消息列表
+
+#### 接口URL
+> http://127.0.0.1:9000/group/listMessage
+
+#### 请求方式
+> POST
+
+#### Content-Type
+> form-data
+
+#### Header参数
+参数名 | 示例值 | 参数类型 | 是否必填 | 参数描述
+--- | --- | --- | --- | ---
+userId | 1 | Text | 是 | 用户id
+token | 84e9d36e4c7c44e0a79bb71f1b4ce9c4 | Text | 是 | 登录令牌
+
+#### 请求Body参数
+参数名 | 示例值 | 参数类型 | 是否必填 | 参数描述
+--- | --- | --- | --- | ---
+userId | 1 | Text | 是 | 该消息的用户id
+groupId | 1 | Text | 是 | 该消息所属群组id
+ts | 1648443134344 | Text | 是 | 该消息的创建时间戳
+count | 5 | Text | 是 | 要获取的消息数量
+
+#### 成功响应示例
+```json
+{
+	"code": 200,
+	"msg": "操作成功",
+	"data": [
+		"{\"groupId\":\"1\",\"userId\":\"1\",\"info\":\"1\",\"ts\":1648368380132}",
+		"{\"groupId\":\"1\",\"userId\":\"1\",\"info\":\"2\",\"ts\":1648368386964}",
+		"{\"groupId\":\"1\",\"userId\":\"1\",\"info\":\"3\",\"ts\":1648368388389}",
+		"{\"groupId\":\"1\",\"userId\":\"1\",\"info\":\"4\",\"ts\":1648368390249}"
+	]
+}
+```
+
+### 用户撤回自己的群聊消息
 
 #### 接口URL
 > http://127.0.0.1:9000/group/delMessage
@@ -299,10 +354,12 @@ token | 84e9d36e4c7c44e0a79bb71f1b4ce9c4 | Text | 是 | 登录令牌
 * server `websocket服务层`
    * GroupChatServer `群组聊天室连接（监听群内聊天消息更新）`
    * GroupListServer `首页群组列表连接（监听用户加入的所有群组数据更新）`
+   * RedisListenServer `Redis订阅监听服务（监听所有IM服务器接收到的消息）`
 * service `控制器服务层`
    * GroupService `群组操作服务`
    * UserService `用户操作服务`
 * util `工具集合`
+   * LoginUtil `登录验证工具`
    * RedisUtil `Redis工具类`
    * ResultUtil `http请求返回模板`
 * FastimApplication `启动类`

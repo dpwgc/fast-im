@@ -1,7 +1,6 @@
 package com.dpwgc.fastim.server;
 
 import com.alibaba.fastjson.JSON;
-import com.dpwgc.fastim.dao.MessageObject;
 import org.springframework.data.redis.connection.Message;
 import org.springframework.data.redis.connection.MessageListener;
 import org.springframework.stereotype.Component;
@@ -10,7 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.websocket.*;
 
 /**
- * 定义一个RedisMessageListener类实现MessageListener接口，做消息订阅的处理
+ * Redis订阅监听服务（监听所有IM服务器接收到的消息）
  */
 @Component
 public class RedisListenServer implements MessageListener {
