@@ -1,14 +1,15 @@
 # Fast-IM
 
-## 基于Spring Boot + WebSocket + Redis的临时群聊系统
+## 基于Spring Boot + WebSocket + Redis的分布式临时群聊系统
 
-* 使用WebSocet进行消息广播。
+* 使用WebSocet连接服务端与客户端。
 * 使用Redis string存储用户登录令牌，key为"login:"+用户id，value为token。
 * 使用Redis list存储群聊消息，key为 "gml:"+群组id，value为群组消息列表（JSON格式）。
 * 使用Redis set存储用户加入的群组列表，key为 "ugs:"+用户id，value为用户当前加入的所有群组id集合。
-
+* 使用Redis pub/sub订阅发布功能实现分布式WebSocket推送服务，订阅发布主题管道名称为 "mq:"+群组id（每个群组单独共享一个主题）。
 ***
 ## 实现功能
+* 分布式WebSocket推送服务。
 * 临时群聊搭建。
 * 自动清除废弃的群聊。
 * 实时推送用户所加入的群组列表的最新信息。
@@ -40,20 +41,21 @@
 ```json
 {
   "list":[
-    {"userId":"3","info":"1-hello","ts":1648368380132}, 
-    {"userId":"1","info":"2-hello","ts":1648368386964}, 
-    {"userId":"1","info":"3-hello","ts":1648368388389}, 
-    {"userId":"3","info":"4-hello","ts":1648368390249}, 
-    {"userId":"1","info":"5-hello","ts":1648368391742}, 
-    {"userId":"2","info":"6-hello","ts":1648368393362}, 
-    {"userId":"1","info":"7-hello","ts":1648368394696}, 
-    {"userId":"6","info":"8-hello","ts":1648368396091}, 
-    {"userId":"1","info":"9-hello","ts":1648368397434}, 
-    {"userId":"1","info":"0-hello","ts":1648368400179}
+    {"groupId":"1","userId":"3","info":"1-hello","ts":1648368380132}, 
+    {"groupId":"1","userId":"1","info":"2-hello","ts":1648368386964}, 
+    {"groupId":"1","userId":"1","info":"3-hello","ts":1648368388389}, 
+    {"groupId":"1","userId":"3","info":"4-hello","ts":1648368390249}, 
+    {"groupId":"1","userId":"1","info":"5-hello","ts":1648368391742}, 
+    {"groupId":"1","userId":"2","info":"6-hello","ts":1648368393362}, 
+    {"groupId":"1","userId":"1","info":"7-hello","ts":1648368394696}, 
+    {"groupId":"1","userId":"6","info":"8-hello","ts":1648368396091}, 
+    {"groupId":"1","userId":"1","info":"9-hello","ts":1648368397434}, 
+    {"groupId":"1","userId":"1","info":"0-hello","ts":1648368400179}
   ], 
   "total":399
 }
 ```
+* `groupId:该消息所属群组id`
 * `userId:发送该消息的用户id`
 * `info:消息主体信息`
 * `ts:消息创建时间戳（毫秒级）`
@@ -90,6 +92,7 @@
   {
     "newMessage":
       {
+        "groupId":"1",
         "userId":"2",
         "info":"hi",
         "ts":1648380678385
@@ -99,6 +102,7 @@
   {
     "newMessage":
       {
+        "groupId":"1",
         "userId":"1",
         "info":"hello",
         "ts":1648380642476
@@ -174,12 +178,12 @@ endPage | 5 | Text | 是 | 终止页
 	"code": 200,
 	"msg": "操作成功",
 	"data": [
-		"{\"userId\":\"1\",\"info\":\"1\",\"ts\":1648368380132}",
-		"{\"userId\":\"1\",\"info\":\"2\",\"ts\":1648368386964}",
-		"{\"userId\":\"1\",\"info\":\"3\",\"ts\":1648368388389}",
-		"{\"userId\":\"1\",\"info\":\"4\",\"ts\":1648368390249}",
-		"{\"userId\":\"1\",\"info\":\"5\",\"ts\":1648368391742}",
-		"{\"userId\":\"1\",\"info\":\"6\",\"ts\":1648368393362}"
+		"{\"groupId\":\"1\",\"userId\":\"1\",\"info\":\"1\",\"ts\":1648368380132}",
+		"{\"groupId\":\"1\",\"userId\":\"1\",\"info\":\"2\",\"ts\":1648368386964}",
+		"{\"groupId\":\"1\",\"userId\":\"1\",\"info\":\"3\",\"ts\":1648368388389}",
+		"{\"groupId\":\"1\",\"userId\":\"1\",\"info\":\"4\",\"ts\":1648368390249}",
+		"{\"groupId\":\"1\",\"userId\":\"1\",\"info\":\"5\",\"ts\":1648368391742}",
+		"{\"groupId\":\"1\",\"userId\":\"1\",\"info\":\"6\",\"ts\":1648368393362}"
 	]
 }
 ```

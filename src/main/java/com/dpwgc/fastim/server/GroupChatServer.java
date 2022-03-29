@@ -1,5 +1,6 @@
 package com.dpwgc.fastim.server;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.dpwgc.fastim.config.IMConfig;
 import com.dpwgc.fastim.dao.MessageList;
@@ -7,6 +8,8 @@ import com.dpwgc.fastim.dao.MessageObject;
 import com.dpwgc.fastim.util.LoginUtil;
 import com.dpwgc.fastim.util.RedisUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.listener.PatternTopic;
+import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.stereotype.Component;
 
 import javax.websocket.*;
@@ -16,7 +19,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * 群组聊天室连接（监听群内聊天消息更新）
@@ -25,14 +27,17 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Component
 public class GroupChatServer {
 
-    //Redis工具类
+    //Redis工具类（交由IOC自动注入）
     private static RedisUtil redisUtil;
 
-    //IM配置信息加载
+    //IM配置信息加载（交由IOC自动注入）
     private static IMConfig imConfig;
 
-    //登录状态检查
+    //登录状态检查（交由IOC自动注入）
     private static LoginUtil loginUtil;
+
+    //Redis订阅监听器设置（交由IOC自动注入）
+    private static RedisMessageListenerContainer redisMessageListenerContainer;
 
     @Autowired
     public void setRepository(RedisUtil redisUtil) {
@@ -49,11 +54,15 @@ public class GroupChatServer {
         GroupChatServer.loginUtil = loginUtil;
     }
 
-    //静态变量，用来记录当前在线连接数,线程安全。
-    private static AtomicInteger onlineNum = new AtomicInteger();
+    @Autowired
+    public void setRepository(RedisMessageListenerContainer redisMessageListenerContainer) {
+        GroupChatServer.redisMessageListenerContainer = redisMessageListenerContainer;
+    }
+
+    //Redis订阅推送消息服务（仅在本类加载时调用一次）
+    private static RedisListenServer redisListenServer = new RedisListenServer();
 
     //concurrent包的线程安全Set，用来存放每个客户端对应的WebSocketServer对象。
-    //消息通道
     private static ConcurrentHashMap<String, Session> sessionPools = new ConcurrentHashMap<>();
 
     //给指定用户发送信息
@@ -85,7 +94,6 @@ public class GroupChatServer {
     public void onOpen(Session session,@PathParam(value = "token") String token, @PathParam(value = "userId") String userId,@PathParam(value = "groupId") String groupId) throws IOException {
 
         sessionPools.put(userId, session);//添加用户
-        addOnlineCount();
 
         //如果开启了用户登录状态检测
         if(imConfig.getLoginAuth() == 1) {
@@ -96,7 +104,6 @@ public class GroupChatServer {
                 sendInfo(userId,"440");
 
                 sessionPools.remove(userId);//删除用户
-                subOnlineCount();
                 session.close();//断开连接
                 return;
             }
@@ -138,7 +145,6 @@ public class GroupChatServer {
                 //如果遍历到末尾还未匹配到群号，则判定用户没有加入该群
                 if(i == set.size()-1) {
                     sessionPools.remove(userId);//删除用户
-                    subOnlineCount();
                     session.close();//断开连接
                     return;
                 }
@@ -152,8 +158,14 @@ public class GroupChatServer {
             messageList.setList(list);//返回list的部分消息
             messageList.setTotal(endPage);//返回redis list的总长度
 
-            //发送消息
-            sendMessage(session, messageList.toString());
+            //发送消息（序列化发送）
+            sendMessage(session, JSON.parse(messageList.toString()).toString());
+
+            //放入session
+            redisListenServer.setSession(userId,session);
+
+            //设置监听器，监听推送该群组的消息
+            redisMessageListenerContainer.addMessageListener(redisListenServer,new PatternTopic("mq:"+groupId));
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -167,7 +179,6 @@ public class GroupChatServer {
     @OnClose
     public void onClose(@PathParam(value = "userId") String userId){
         sessionPools.remove(userId);//删除用户
-        subOnlineCount();
     }
 
     /**
@@ -188,13 +199,13 @@ public class GroupChatServer {
                 sendInfo(userId,"440");
 
                 sessionPools.remove(userId);//删除用户
-                subOnlineCount();
                 return;
             }
         }
 
         //创建消息模板
         MessageObject messageObject = new MessageObject();
+        messageObject.setGroupId(groupId);
         messageObject.setUserId(userId);
         messageObject.setInfo(message);
         messageObject.setTs(System.currentTimeMillis());
@@ -205,18 +216,8 @@ public class GroupChatServer {
         //将消息插入Redis list中（key为groupId）
         redisUtil.lSet("gml:"+groupId,jsonStr,imConfig.getTimeout());
 
-        //在群内广播推送消息
-        for (Session session: sessionPools.values()) {
-            try {
-                //如果是群组id相同的连接
-                if(session.getPathParameters().get("groupId").equals(groupId)){
-                    //向其推送消息
-                    sendMessage(session, jsonStr);
-                }
-            } catch(Exception e){
-                e.printStackTrace();
-            }
-        }
+        //在redis中发布消息
+        redisUtil.pub("mq:"+groupId,jsonStr);
     }
 
     //错误时调用
@@ -225,13 +226,5 @@ public class GroupChatServer {
         throwable.printStackTrace();
         //关闭对话
         session.close();
-    }
-
-    public static void addOnlineCount(){
-        onlineNum.incrementAndGet();
-    }
-
-    public static void subOnlineCount() {
-        onlineNum.decrementAndGet();
     }
 }

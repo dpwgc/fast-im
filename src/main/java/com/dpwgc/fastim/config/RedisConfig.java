@@ -1,12 +1,17 @@
 package com.dpwgc.fastim.config;
 
+import com.dpwgc.fastim.server.RedisListenServer;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.listener.PatternTopic;
+import org.springframework.data.redis.listener.RedisMessageListenerContainer;
+import org.springframework.data.redis.listener.adapter.MessageListenerAdapter;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
@@ -15,6 +20,25 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
  */
 @Configuration
 public class RedisConfig {
+
+    @Bean("container")
+    RedisMessageListenerContainer container(RedisConnectionFactory connectionFactory,
+                                            MessageListenerAdapter listenerAdapter) {
+
+        RedisMessageListenerContainer container = new RedisMessageListenerContainer();
+        LettuceConnectionFactory lettuceConnectionFactory = (LettuceConnectionFactory) connectionFactory;
+        //设置存储的节点
+        lettuceConnectionFactory.setDatabase(0);
+        container.setConnectionFactory(lettuceConnectionFactory);
+        //设置要监听的主题
+        //container.addMessageListener(listenerAdapter, new PatternTopic("mq"));
+        return container;
+    }
+
+    @Bean
+    MessageListenerAdapter listenerAdapter(RedisListenServer redisListenServer) {
+        return new MessageListenerAdapter(redisListenServer);
+    }
 
     @Bean
     @SuppressWarnings("all")

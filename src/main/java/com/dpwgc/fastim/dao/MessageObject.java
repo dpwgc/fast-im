@@ -5,6 +5,7 @@ package com.dpwgc.fastim.dao;
  */
 public class MessageObject {
 
+    private String groupId; //该消息所属群组id
     private String userId;  //发送该消息的用户id
     private String info;    //消息主体信息
     private Long ts;        //消息创建时间戳（毫秒级）
@@ -31,5 +32,13 @@ public class MessageObject {
 
     public String getUserId() {
         return userId;
+    }
+
+    public void setGroupId(String groupId) {
+        this.groupId = groupId;
+    }
+
+    public String getGroupId() {
+        return groupId;
     }
 }

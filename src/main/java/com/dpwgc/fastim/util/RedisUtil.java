@@ -424,4 +424,16 @@ public class RedisUtil {
             return 0;
         }
     }
+
+    //====================pub/sub======================
+
+    /**
+     * 发布消息
+     * @param channel 管道/主题名称
+     * @param message 消息主体信息
+     */
+    public void pub(String channel, String message) {
+
+        redisTemplate.convertAndSend(channel, message);
+    }
 }
