@@ -1,8 +1,8 @@
-#服务端口
+# 服务端口
 server:
   port: 9000
 
-#Redis配置
+# Redis配置
 spring:
   redis:
     database: 3
@@ -16,20 +16,20 @@ spring:
         min-idle: 0
         max-wait: 60s
 
-#IM配置
+# IM服务配置
 im:
   group:
-    #进行websocket连接后是否校验用户登录状态（登录验证，比对userId & token。1：开启，0：关闭）
+    # 进行websocket连接后是否校验用户登录状态（登录验证，比对userId & token。1：开启，0：关闭）
     loginAuth: 0
-    #用户是否在websocket连接建立时自动加入群组（1：是，0：否），如果为否，则需要先调用http接口/group/joinGroup让用户加入群组，再建立连接
+    # 用户是否在websocket连接建立时自动加入群组（1：是，0：否），如果为否，则需要先调用http接口/group/joinGroup让用户加入群组，再建立连接
     autoJoin: 1
   groupMessage:
-    #群组消息列表在redis中的最长存储时间（默认一周，如果该群在一周内无人发言，则删除该群组的消息列表）
+    # 群组消息列表在redis中的最长存储时间（默认一周，如果该群在一周内无人发言，则删除该群组的消息列表）
     timeout: 604800
-    #每次请求获取的消息数量（默认50条）
+    # 聊天室WebSocket连接建立后返回的消息数量（默认50条）
     listNum: 50
-    #消息撤回时限（单位：秒，默认2分钟后禁止撤回）
+    # 消息撤回时限（单位：秒，默认2分钟后禁止撤回）
     recallTimeLimit: 120
   groupList:
-    #用户群组列表信息检查频率（每{updateRate}秒检查一次列表信息，如有更新则将最新列表信息推送给客户端）
+    # 用户群组列表信息检查频率（每{updateRate}秒检查一次列表信息，如有更新则将最新列表信息推送给客户端）
     updateRate: 1
