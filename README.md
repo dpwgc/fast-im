@@ -2,12 +2,15 @@
 
 ## 基于Spring Boot + WebSocket + Redis的分布式即时通讯群聊系统
 
+#### 适用于直播间聊天、游戏内聊天、客服聊天等临时性群聊场景。
+
 * 使用WebSocet连接IM服务端与客户端。
 * 使用Redis string存储用户登录令牌，key为"login:"+用户id，value为token。
 * 使用Redis list存储群聊消息，key为 "gml:"+群组id，value为群组消息列表（JSON格式）。
 * 使用Redis set存储用户加入的群组列表，key为 "ugs:"+用户id，value为用户当前加入的所有群组id集合。
 * 使用Redis pub/sub订阅发布功能实现分布式WebSocket推送服务，订阅发布主题管道名称为 "mq:"+群组id（每个群组单独共享一个主题）。
 
+![avatar](./ws_img.jpg)
 ***
 
 ## 实现功能
@@ -26,6 +29,8 @@
 * 配置application.yml文件中的参数。
 * 启动项目。
 * 启动后访问 http://127.0.0.1:9000/test/websocket ，测试WebSocket连接。
+
+![avatar](./ws_test.jpg)
 ***
 
 ## 自定义业务逻辑
