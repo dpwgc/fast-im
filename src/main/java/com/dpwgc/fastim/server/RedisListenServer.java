@@ -14,7 +14,7 @@ import javax.websocket.*;
 @Component
 public class RedisListenServer implements MessageListener {
 
-    //concurrent包的线程安全Set，用来存放每个客户端对应的WebSocketServer对象。
+    //concurrent包的线程安全Set，用来存放每个客户端对应的WebSocket session对象。
     private static ConcurrentHashMap<String, Session> sessionPools = new ConcurrentHashMap<>();
 
     //插入新的session

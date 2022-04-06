@@ -65,6 +65,9 @@ public class GroupChatServer {
     //concurrent包的线程安全Set，用来存放每个客户端对应的WebSocketServer对象。
     private static ConcurrentHashMap<String, Session> sessionPools = new ConcurrentHashMap<>();
 
+    //记录Redis监听器，避免不同用户连接同一群组时重复创建订阅监听。
+    private static ConcurrentHashMap<String, Boolean> redisListenMap = new ConcurrentHashMap<>();
+
     //给指定用户发送信息
     public static void sendInfo(String userId, String message){
         Session session = sessionPools.get(userId);
@@ -95,6 +98,9 @@ public class GroupChatServer {
 
         sessionPools.put(userId, session);//添加用户
 
+        /*
+         * === 用户登录状态验证 ===
+         */
         //如果开启了用户登录状态检测
         if(imConfig.getLoginAuth() == 1) {
             //验证用户登录状态
@@ -111,6 +117,9 @@ public class GroupChatServer {
 
         try {
 
+            /*
+             * === 验证用户是否加入群聊 ===
+             */
             //是否自动加群
             if(imConfig.getAutoJoin() == 1) {
                 //更新用户加入的群组集合（如果用户在此前没有加入该群组，则自动将该群组添加进用户群组集合）
@@ -137,6 +146,21 @@ public class GroupChatServer {
                 }
             }
 
+            /*
+             * === 设置监听器，监听在线消息 ===
+             */
+            //将session与userId传入Redis订阅监听器
+            redisListenServer.setSession(userId,session);
+            //设置监听器，监听推送该群组的消息，redisListenMap避免重复订阅。
+            if (redisListenMap.get("mq:"+groupId) == null) {
+                //如果当前这个"mq:"+groupId主题没有被订阅，则建立监听器。
+                redisMessageListenerContainer.addMessageListener(redisListenServer,new PatternTopic("mq:"+groupId));
+                redisListenMap.put("mq:"+groupId,true);
+            }
+
+            /*
+             * === 返回群内最新的消息列表 ===
+             */
             //list的总长度（终止页）
             long endPage = redisUtil.lGetListSize("gml:"+groupId);
             //单次获取的消息数量
@@ -158,12 +182,6 @@ public class GroupChatServer {
 
             //发送消息（序列化发送）
             sendMessage(session, JSON.parse(messageList.toString()).toString());
-
-            //放入session
-            redisListenServer.setSession(userId,session);
-
-            //设置监听器，监听推送该群组的消息
-            redisMessageListenerContainer.addMessageListener(redisListenServer,new PatternTopic("mq:"+groupId));
 
         } catch (IOException e) {
             e.printStackTrace();
